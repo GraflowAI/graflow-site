@@ -4,27 +4,47 @@
  * work well for content-centric websites.
  */
 
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&family=Source+Code+Pro:wght@400;500;600&family=Zilla+Slab:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* Primary colors - green/lime */
+  --ifm-color-primary: #89b400;
+  --ifm-color-primary-dark: #7ba200;
+  --ifm-color-primary-darker: #749900;
+  --ifm-color-primary-darkest: #5f7e00;
+  --ifm-color-primary-light: #97c500;
+  --ifm-color-primary-lighter: #9ecc00;
+  --ifm-color-primary-lightest: #b3e600;
+
+  /* Link color */
+  --ifm-link-color: #628000;
+  --ifm-link-hover-color: #89b400;
+
+  /* Fonts */
+  --ifm-font-family-base: 'Lato', system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-family: 'Zilla Slab', Georgia, serif;
+  --ifm-font-family-monospace: 'Source Code Pro', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(137, 180, 0, 0.1);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  /* Primary colors - dark mode */
+  --ifm-color-primary: #a5d610;
+  --ifm-color-primary-dark: #95c10e;
+  --ifm-color-primary-darker: #8db60e;
+  --ifm-color-primary-darkest: #74960b;
+  --ifm-color-primary-light: #b5eb12;
+  --ifm-color-primary-lighter: #bdf014;
+  --ifm-color-primary-lightest: #cef53d;
+
+  /* Link color */
+  --ifm-link-color: #a5d610;
+  --ifm-link-hover-color: #cef53d;
+
+  --docusaurus-highlighted-code-line-bg: rgba(165, 214, 16, 0.2);
 }
