@@ -5,9 +5,13 @@
 
 .heroBanner {
   padding: 4rem 0;
-  text-align: center;
+  text-align: left;
   position: relative;
   overflow: hidden;
+}
+
+.heroBanner .hero__subtitle strong {
+  color: var(--ifm-color-primary-lightest);
 }
 
 @media screen and (max-width: 996px) {
@@ -19,5 +23,152 @@
 .buttons {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+/* Features Section */
+.features {
+  display: flex;
+  align-items: center;
+  padding: 3rem 0;
+  width: 100%;
+}
+
+.feature {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.feature h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature p {
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Example Section - Code + Video */
+.exampleSection {
+  padding: 3rem 0;
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+[data-theme='dark'] .exampleSection {
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+.exampleSection h2 {
+  margin-bottom: 1rem;
+}
+
+.exampleSection p {
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 1.5rem;
+}
+
+.seeMoreLink {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+.videoContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.videoPlaceholder {
+  flex: 1;
+  min-height: 300px;
+  background-color: var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  border: 2px dashed var(--ifm-color-emphasis-400);
+}
+
+.placeholderContent {
+  text-align: center;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.placeholderContent span {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.placeholderContent small {
+  font-size: 0.9rem;
+}
+
+/* Intro Video Section */
+.introVideoSection {
+  padding: 3rem 0;
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+.introVideoSection h2 {
+  margin-bottom: 1rem;
+}
+
+.youtubeWrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.youtubeEmbed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.introDescription {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.introDescription p {
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 1rem;
+}
+
+.introDescription ul {
+  margin-bottom: 1.5rem;
+  padding-left: 1.25rem;
+}
+
+.introDescription li {
+  margin-bottom: 0.5rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 996px) {
+  .exampleSection .row,
+  .introVideoSection .row {
+    flex-direction: column;
+  }
+
+  .exampleSection .col,
+  .introVideoSection .col {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .videoContainer,
+  .introDescription {
+    margin-top: 2rem;
+  }
 }
