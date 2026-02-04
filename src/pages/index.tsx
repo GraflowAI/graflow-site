@@ -87,7 +87,7 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/">
+            to="/docs/getting-started/introduction">
             Get Started
           </Link>
         </div>
@@ -124,7 +124,7 @@ function WorkflowExampleSection() {
             <CodeBlock language="yaml" title="workflow.yaml">
               {workflowExample}
             </CodeBlock>
-            <Link className={styles.seeMoreLink} to="/docs/getting-started/tutorial">
+            <Link className={styles.seeMoreLink} to="/docs/getting-started/hello-world">
               See more examples →
             </Link>
           </div>
@@ -176,7 +176,7 @@ function IntroVideoSection() {
               <li>Seamless integration with existing tools</li>
               <li>Production-ready from day one</li>
             </ul>
-            <Link className={styles.seeMoreLink} to="/docs/">
+            <Link className={styles.seeMoreLink} to="/docs/getting-started/introduction">
               Read the documentation →
             </Link>
           </div>

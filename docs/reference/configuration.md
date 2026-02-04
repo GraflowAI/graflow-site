@@ -52,4 +52,4 @@ env:
 
 ## Examples
 
-See the [Getting Started](../getting-started) section for practical examples.
+See the [Getting Started](../getting-started/introduction) section for practical examples.

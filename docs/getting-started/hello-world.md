@@ -48,4 +48,4 @@ Graflow provides detailed logging for every step:
 
 ## Next Steps
 
-Congratulations! You've run your first Graflow workflow. Continue to the [Tutorial](./tutorial) to learn more advanced features.
+Congratulations! You've run your first Graflow workflow. Continue to the [Tutorial](/docs/tutorial) to learn more advanced features.

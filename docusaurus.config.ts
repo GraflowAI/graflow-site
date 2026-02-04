@@ -97,15 +97,15 @@ const config: Config = {
           items: [
             {
               label: 'Getting Started',
-              to: '/docs/getting-started',
+              to: '/docs/getting-started/introduction',
             },
             {
               label: 'Concepts',
-              to: '/docs/concepts',
+              to: '/docs/concepts/workflows',
             },
             {
               label: 'Reference',
-              to: '/docs/reference',
+              to: '/docs/reference/configuration',
             },
           ],
         },
