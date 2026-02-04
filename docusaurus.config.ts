@@ -15,7 +15,7 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://graflowai.github.io',
+  url: 'https://graflow.ai',
   // Set the /<baseUrl>/ pathname under which your site is served
   baseUrl: '/',
 
