@@ -15,15 +15,14 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://graflow.ai',
+  url: 'https://graflowai.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'GraflowAI', // Usually your GitHub org/user name.
-  projectName: 'graflow', // Usually your repo name.
+  organizationName: 'GraflowAI',
+  projectName: 'graflow-site',
+  trailingSlash: false,
 
   onBrokenLinks: 'throw',
 
