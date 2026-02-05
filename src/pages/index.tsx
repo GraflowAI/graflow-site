@@ -11,7 +11,7 @@ import styles from './index.module.css';
 // Feature data
 const features = [
   {
-    title: 'Reliable',
+    title: '🛡️ Reliable',
     description: (
       <>
         Built-in fault tolerance and automatic recovery ensure your workflows
@@ -21,7 +21,7 @@ const features = [
     ),
   },
   {
-    title: 'Explainable',
+    title: '🔍 Explainable',
     description: (
       <>
         Full visibility into every step of your workflow execution. Detailed
@@ -31,7 +31,7 @@ const features = [
     ),
   },
   {
-    title: 'Scalable',
+    title: '🚀 Scalable',
     description: (
       <>
         Seamlessly scale from local development to production clusters.
