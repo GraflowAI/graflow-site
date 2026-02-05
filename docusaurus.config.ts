@@ -148,8 +148,9 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
     },
     algolia: {
-      appId: process.env.ALGOLIA_APP_ID || 'YOUR_APP_ID',
-      apiKey: process.env.ALGOLIA_API_KEY || 'YOUR_SEARCH_API_KEY',
+      appId: process.env.ALGOLIA_APP_ID || 'BA3LV75V9D',
+      // Note: This is the public search API key which can be safely used in your frontend code.
+      apiKey: process.env.ALGOLIA_API_KEY || 'fecf5829d295ee9943f5f3c699ac5976',
       indexName: process.env.ALGOLIA_INDEX_NAME || 'graflow_ai',
       contextualSearch: true,
       searchPagePath: 'search',
