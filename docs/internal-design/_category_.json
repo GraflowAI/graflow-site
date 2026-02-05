@@ -1,0 +1,8 @@
+{
+  "label": "Internal Design",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Deep dive into Graflow's internal architecture, execution model, and design patterns."
+  }
+}
