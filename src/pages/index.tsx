@@ -43,25 +43,22 @@ const features = [
 ];
 
 // Sample workflow code
-const workflowExample = `# workflow.yaml
-name: data-pipeline
-tasks:
-  - name: extract
-    image: python:3.11
-    script: |
-      python extract_data.py --source=db
+const workflowExample = `@task(inject_context=True)
+def extract(ctx: TaskExecutionContext):
+    ...
 
-  - name: transform
-    depends_on: [extract]
-    image: python:3.11
-    script: |
-      python transform.py --input=raw --output=clean
+@task
+def filter_pass(data): ...
 
-  - name: load
-    depends_on: [transform]
-    image: python:3.11
-    script: |
-      python load_data.py --dest=warehouse`;
+@task
+def assign_grade(data): ...
+
+@task
+def load(data): ...
+
+with workflow("hello_etl") as wf:
+    _ = extract >> (filter_pass | assign_grade).set_group_name("transforms") >> load
+    wf.execute("extract")`;
 
 function Feature({ title, description }: { title: string; description: ReactNode }) {
   return (
@@ -118,41 +115,28 @@ function WorkflowExampleSection() {
           <div className={clsx('col col--6')}>
             <Heading as="h2">Define Your Workflow</Heading>
             <p>
-              Simple YAML configuration lets you define complex data pipelines
+              Intuitive Python API lets you define complex data pipelines
               with dependencies, error handling, and parallel execution.
             </p>
-            <CodeBlock language="yaml" title="workflow.yaml">
+            <CodeBlock language="python" title="hello_etl.py">
               {workflowExample}
             </CodeBlock>
+            <div className={styles.badgeRow}>
+              <a
+                href="https://colab.research.google.com/github/GraflowAI/graflow-examples/blob/main/examples/notebooks/simple_etl.ipynb"
+                target="_blank"
+                rel="noopener noreferrer">
+                <img
+                  src="https://colab.research.google.com/assets/colab-badge.svg"
+                  alt="Open In Colab"
+                />
+              </a>
+            </div>
             <Link className={styles.seeMoreLink} to="/docs/getting-started/hello-world">
               See more examples →
             </Link>
           </div>
           <div className={clsx('col col--6', styles.videoContainer)}>
-            <Heading as="h2">Watch It Run</Heading>
-            <p>
-              See how Graflow executes your workflow with real-time progress
-              tracking and detailed logging.
-            </p>
-            <div className={styles.videoPlaceholder}>
-              <div className={styles.placeholderContent}>
-                <span>Workflow Demo Video</span>
-                <small>Coming soon</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function IntroVideoSection() {
-  return (
-    <section className={styles.introVideoSection}>
-      <div className="container">
-        <div className="row">
-          <div className={clsx('col col--6')}>
             <Heading as="h2">Learn More About Graflow</Heading>
             <div className={styles.youtubeWrapper}>
               <iframe
@@ -164,22 +148,31 @@ function IntroVideoSection() {
               />
             </div>
           </div>
-          <div className={clsx('col col--6', styles.introDescription)}>
-            <Heading as="h2">Why Graflow?</Heading>
-            <p>
-              Graflow is designed to simplify complex data workflows while
-              providing full transparency and reliability at scale.
-            </p>
-            <ul>
-              <li>Easy-to-understand YAML configuration</li>
-              <li>Built-in monitoring and observability</li>
-              <li>Seamless integration with existing tools</li>
-              <li>Production-ready from day one</li>
-            </ul>
-            <Link className={styles.seeMoreLink} to="/docs/getting-started/introduction">
-              Read the documentation →
-            </Link>
-          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WhyGraflowSection() {
+  return (
+    <section className={styles.introVideoSection}>
+      <div className="container">
+        <div className={clsx('col col--8', styles.introDescription)}>
+          <Heading as="h2">Why Graflow?</Heading>
+          <p>
+            Graflow is designed to simplify complex data workflows while
+            providing full transparency and reliability at scale.
+          </p>
+          <ul>
+            <li>Intuitive Python API for workflow definitions</li>
+            <li>Built-in monitoring and observability</li>
+            <li>Seamless integration with existing tools</li>
+            <li>Production-ready from day one</li>
+          </ul>
+          <Link className={styles.seeMoreLink} to="/docs/getting-started/introduction">
+            Read the documentation →
+          </Link>
         </div>
       </div>
     </section>
@@ -196,7 +189,7 @@ export default function Home(): ReactNode {
       <main>
         <FeaturesSection />
         <WorkflowExampleSection />
-        <IntroVideoSection />
+        <WhyGraflowSection />
       </main>
     </Layout>
   );

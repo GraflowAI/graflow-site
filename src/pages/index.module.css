@@ -68,6 +68,10 @@
   margin-bottom: 1.5rem;
 }
 
+.badgeRow {
+  margin-top: 0.75rem;
+}
+
 .seeMoreLink {
   display: inline-block;
   margin-top: 1rem;
