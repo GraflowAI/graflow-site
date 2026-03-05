@@ -2,9 +2,31 @@
 sidebar_position: 3
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Hello World
 
 Let's create your first Graflow workflow.
+
+## Install Graflow
+
+<Tabs>
+  <TabItem value="pip" label="pip" default>
+
+```bash
+pip install graflow
+```
+
+  </TabItem>
+  <TabItem value="uv" label="uv">
+
+```bash
+uv add graflow
+```
+
+  </TabItem>
+</Tabs>
 
 ## Create a Workflow File
 
@@ -24,9 +46,22 @@ tasks:
 
 Execute your workflow using the Graflow CLI:
 
+<Tabs>
+  <TabItem value="pip" label="pip" default>
+
 ```bash
 graflow run workflow.yaml
 ```
+
+  </TabItem>
+  <TabItem value="uv" label="uv">
+
+```bash
+uv run graflow run workflow.yaml
+```
+
+  </TabItem>
+</Tabs>
 
 You should see output similar to:
 
