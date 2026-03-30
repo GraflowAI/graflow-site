@@ -1,0 +1,84 @@
+---
+sidebar_position: 3
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Installation
+
+This guide will help you install Graflow on your system.
+
+## System Requirements
+
+- Python 3.9 or higher
+- Docker (optional, for containerized tasks)
+
+## Installation Methods
+
+<Tabs>
+  <TabItem value="pip" label="pip" default>
+
+```bash
+pip install graflow
+```
+
+  </TabItem>
+  <TabItem value="uv" label="uv">
+
+```bash
+uv add graflow
+```
+
+  </TabItem>
+</Tabs>
+
+### Install with All Extras
+
+To install Graflow with all optional dependencies:
+
+<Tabs>
+  <TabItem value="pip" label="pip" default>
+
+```bash
+pip install "graflow[all]"
+```
+
+  </TabItem>
+  <TabItem value="uv" label="uv">
+
+```bash
+uv add "graflow[all]"
+```
+
+  </TabItem>
+</Tabs>
+
+`graflow[all]` includes the following extras:
+
+| Extra | Description |
+|-------|-------------|
+| `api` | REST API server (FastAPI, Uvicorn) |
+| `visualization` | Graph visualization (Matplotlib, Graphviz) |
+| `tracing` | Observability (OpenTelemetry, Langfuse) |
+| `docker` | Docker-based task execution |
+| `redis` | Redis-backed distributed execution |
+| `adk` | Google ADK agent integration |
+| `pydantic-ai` | Pydantic AI agent integration |
+
+You can also install individual extras, e.g. `graflow[visualization]` or `graflow[tracing]`.
+
+## Verify Installation
+
+After installation, verify that Graflow is installed correctly:
+
+```python
+import graflow
+print(graflow.__version__)
+```
+
+You should see the version number printed to the console.
+
+## Next Steps
+
+Now that you have Graflow installed, let's create your first workflow in the [Hello World](./hello-world) tutorial.

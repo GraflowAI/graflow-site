@@ -48,12 +48,16 @@ with workflow("etl_pipeline") as wf:
 ```
 
 :::note
-Note Graflow also provides low-level APIs to define task graphs as well. See the [Reference](/docs/reference/configuration) for details.
+Note Graflow also provides low-level APIs to define task graphs as well.
 :::
 
 ### Dynamic Transitions at Runtime
 
 Traditional DAG-based systems cannot express cycles by definition. With Graflow's **State Machine execution**, cycles and dynamic branching become natural:
+
+:::tip Defined-by-Run
+This approach is conceptually similar to the **Define-by-Run** (also known as [Dynamic Computation Graph](https://apxml.com/courses/advanced-pytorch/chapter-1-pytorch-internals-autograd/computational-graph)) paradigm found in deep learning frameworks such as PyTorch and Chainer. Instead of declaring the entire computation graph upfront (Define-and-Run), the execution graph is constructed dynamically as the code runs, enabling flexible control flow like cycles and conditional branching.
+:::
 
 ```python
 @task(inject_context=True)

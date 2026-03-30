@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 import Tabs from '@theme/Tabs';
@@ -28,58 +28,105 @@ uv add graflow
   </TabItem>
 </Tabs>
 
-## Create a Workflow File
+## Your First Task
 
-Create a new file called `workflow.yaml`:
+Create a file called `hello.py`:
 
-```yaml
-name: hello-world
-description: My first Graflow workflow
+```python
+from graflow import task
 
-tasks:
-  - name: greet
-    script: |
-      echo "Hello, Graflow!"
+@task
+def hello():
+    print("Hello, Graflow!")
+    return "success"
+
+if __name__ == "__main__":
+    result = hello.run()
+    print(f"Task completed with result: {result}")
 ```
 
-## Run the Workflow
-
-Execute your workflow using the Graflow CLI:
+Run it:
 
 <Tabs>
   <TabItem value="pip" label="pip" default>
 
 ```bash
-graflow run workflow.yaml
+python hello.py
 ```
 
   </TabItem>
   <TabItem value="uv" label="uv">
 
 ```bash
-uv run graflow run workflow.yaml
+uv run hello.py
 ```
 
   </TabItem>
 </Tabs>
 
-You should see output similar to:
+You should see:
 
 ```
-[2025-01-01 12:00:00] Starting workflow: hello-world
-[2025-01-01 12:00:00] Running task: greet
 Hello, Graflow!
-[2025-01-01 12:00:01] Task completed: greet
-[2025-01-01 12:00:01] Workflow completed successfully
+Task completed with result: success
 ```
 
-## Understanding the Output
+## Your First Workflow
 
-Graflow provides detailed logging for every step:
+Now let's chain multiple tasks into a workflow. Create `pipeline.py`:
 
-- **Timestamps**: When each task started and completed
-- **Task names**: Which task is currently running
-- **Output**: The actual output from your scripts
+```python
+from graflow import task, workflow
+
+with workflow("simple_pipeline") as wf:
+
+    @task
+    def start():
+        print("Starting!")
+
+    @task
+    def middle():
+        print("Middle!")
+
+    @task
+    def end():
+        print("End!")
+
+    # Define sequential pipeline: start -> middle -> end
+    start >> middle >> end
+
+    # Execute the workflow
+    wf.execute()
+```
+
+Run it:
+
+<Tabs>
+  <TabItem value="pip" label="pip" default>
+
+```bash
+python pipeline.py
+```
+
+  </TabItem>
+  <TabItem value="uv" label="uv">
+
+```bash
+uv run pipeline.py
+```
+
+  </TabItem>
+</Tabs>
+
+You should see:
+
+```
+Starting!
+Middle!
+End!
+```
+
+The `>>` operator chains tasks sequentially — `middle` runs after `start`, and `end` runs after `middle`.
 
 ## Next Steps
 
