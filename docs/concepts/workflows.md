@@ -219,6 +219,74 @@ from graflow.core.handlers.group_policy import (
 | **AtLeastN** | At least N tasks must succeed |
 | **Critical** | Only specified tasks must succeed |
 
+## Low-Level TaskGraph API
+
+The high-level `workflow()` context manager and operators (`>>`, `|`) are the recommended way to build workflows. However, Graflow also provides a **low-level TaskGraph API** for programmatic graph construction — similar to how [LangGraph](https://langchain-ai.github.io/langgraph/) lets you define agent workflows as explicit graph structures.
+
+This is useful when you need:
+
+- **Dynamic graph construction** based on runtime conditions or external configuration
+- **Fine-grained control** over nodes and edges
+- **Integration with external workflow definitions** (e.g., migrating from Airflow, Prefect)
+- **Graph inspection and analysis** before execution
+
+### Example: Diamond Pattern
+
+```python
+from graflow.core.context import ExecutionContext
+from graflow.core.engine import WorkflowEngine
+from graflow.core.graph import TaskGraph
+from graflow.core.task import TaskWrapper
+
+# Define tasks
+fetch = TaskWrapper("fetch", func=lambda: print("Fetching data..."), register_to_context=False)
+transform_a = TaskWrapper("transform_a", func=lambda: print("Transform A..."), register_to_context=False)
+transform_b = TaskWrapper("transform_b", func=lambda: print("Transform B..."), register_to_context=False)
+store = TaskWrapper("store", func=lambda: print("Storing results..."), register_to_context=False)
+
+# Build graph explicitly
+graph = TaskGraph()
+graph.add_node(fetch, "fetch")
+graph.add_node(transform_a, "transform_a")
+graph.add_node(transform_b, "transform_b")
+graph.add_node(store, "store")
+
+graph.add_edge("fetch", "transform_a")
+graph.add_edge("fetch", "transform_b")
+graph.add_edge("transform_a", "store")
+graph.add_edge("transform_b", "store")
+
+# Execute
+context = ExecutionContext.create(graph, "fetch", max_steps=10)
+engine = WorkflowEngine()
+engine.execute(context)
+```
+
+This is equivalent to the high-level version:
+
+```python
+fetch >> (transform_a | transform_b) >> store
+```
+
+:::tip
+You can also mix both approaches — build an initial workflow with the high-level API, then modify the underlying graph programmatically:
+
+```python
+with workflow("mixed") as wf:
+    task_a >> task_b
+
+    # Access the underlying graph and extend it
+    graph = wf.graph
+    task_c = TaskWrapper("task_c", func=lambda: print("Task C"), register_to_context=False)
+    graph.add_node(task_c, "task_c")
+    graph.add_edge("task_b", "task_c")
+
+    wf.execute()
+```
+:::
+
+For more examples, see the [Low-Level TaskGraph API example](https://github.com/GraflowAI/graflow/blob/main/examples/02_workflows/task_graph_lowlevel_api.py).
+
 ## Next Steps
 
 - Learn about [Tasks](./tasks) and how to define them
