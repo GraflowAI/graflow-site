@@ -170,6 +170,82 @@ Recovered after 3 attempts
 Per-task `max_retries` takes precedence over `default_max_retries`. Use the global default for a baseline, and override on individual tasks as needed.
 :::
 
+## Retry Policy (Exponential Backoff)
+
+For more control over retry behavior, use `RetryPolicy` instead of a plain `max_retries` integer. `RetryPolicy` adds configurable backoff delays between retries.
+
+### RetryPolicy Parameters
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `max_retries` | `0` | Maximum number of retry attempts after initial failure |
+| `initial_interval` | `1.0` | Wait time in seconds before the first retry |
+| `backoff_factor` | `2.0` | Multiplier applied to the interval after each retry |
+| `max_interval` | `60.0` | Upper bound on the wait time in seconds |
+| `jitter` | `False` | Randomize delay by +/-50% to avoid thundering herd |
+
+### Example: Exponential Backoff
+
+```python
+from graflow.core.context import ExecutionContext
+from graflow.core.decorators import task
+from graflow.core.engine import WorkflowEngine
+from graflow.core.graph import TaskGraph
+from graflow.core.retry import RetryPolicy
+
+graph = TaskGraph()
+attempts = 0
+
+@task(
+    retry_policy=RetryPolicy(
+        max_retries=3,
+        initial_interval=0.1,  # short for demo
+        backoff_factor=2.0,    # 0.1s → 0.2s → 0.4s
+    ),
+)
+def flaky_service():
+    global attempts
+    attempts += 1
+    if attempts < 3:
+        raise ConnectionError(f"timeout (attempt {attempts})")
+    return "success"
+
+graph.add_node(flaky_service, "flaky_service")
+context = ExecutionContext.create(graph, start_node="flaky_service")
+WorkflowEngine().execute(context)
+print(f"Recovered after {attempts} attempts")
+```
+
+**Output:**
+```
+Recovered after 3 attempts
+```
+
+The delay between retries grows exponentially: 0.1s, then 0.2s. With `backoff_factor=2.0`, each retry waits twice as long as the previous one, up to `max_interval`.
+
+### Delay Calculation
+
+The delay before retry `n` (0-based) is:
+
+```
+delay = min(initial_interval * backoff_factor^n, max_interval)
+```
+
+For example, with `initial_interval=1.0` and `backoff_factor=2.0`:
+
+| Retry # | Delay |
+|---------|-------|
+| 1st | 1.0s |
+| 2nd | 2.0s |
+| 3rd | 4.0s |
+| 4th | 8.0s |
+
+When `jitter=True`, the calculated delay is multiplied by a random factor in `[0.5, 1.5]`. This is useful when many tasks might fail and retry simultaneously (thundering herd problem).
+
+:::note
+When using `retry_policy`, you don't need to set `max_retries` separately -- `RetryPolicy.max_retries` is used automatically.
+:::
+
 ## Retry vs. Iteration
 
 Retries and iterations are distinct mechanisms:
