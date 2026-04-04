@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'draft/**'
+      - 'notebooks/**'
+      - '*.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - 'Makefile'
+      - 'tmp/**'
 
 jobs:
   build:
