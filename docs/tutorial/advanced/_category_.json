@@ -3,6 +3,6 @@
   "position": 3,
   "link": {
     "type": "generated-index",
-    "description": "Dynamic task generation and advanced control flow."
+    "description": "Dynamic task generation, retries, iterations, and advanced control flow."
   }
 }
