@@ -10,7 +10,7 @@ published: false
 
 本記事は、[@takuh](https://zenn.dev/takuh) さんの「[LangGraph 入門 〜初学者のためのハンズオンガイド〜](https://zenn.dev/takuh/articles/084dc043ffa56c)」にインスパイアされて執筆しました。LangGraphの概念を丁寧に解説されている素晴らしい記事ですので、LangGraphに興味がある方はぜひご一読ください。
 
-Claude CodeやOpenHands（旧OpenDevin）のような**自律型コーディングエージェント**が注目を集めています。しかしエンタープライズの現場では、コンプライアンス要件、承認フロー、監査証跡といった制約から、**AIにすべてを任せきる完全自律型がそのまま適用できるケースは限られます**。むしろ「AIが処理を進めつつ、要所では人間が判断・承認する」**半自律型のアプローチ**——すなわち **Agentic Workflow** ——が、現実的な落としどころとして、特にエンタープライズなど制約の大きい領域では、完全自律型から半自律型へのゆり戻しが起きるのではないかと考えています。
+Claude Code（[Cowork](https://docs.anthropic.com/en/docs/claude-code/cowork)含む）やOpenClawのような**自律型コーディングエージェント**が注目を集めています。しかしエンタープライズの現場では、コンプライアンス要件、承認フロー、監査証跡といった制約から、**AIにすべてを任せきる完全自律型がそのまま適用できるケースは限られます**。むしろ「AIが処理を進めつつ、要所では人間が判断・承認する」**半自律型のアプローチ**——すなわち **Agentic Workflow** ——が、現実的な落としどころとして、特にエンタープライズなど制約の大きい領域では、完全自律型から半自律型へのゆり戻しが起きるのではないかと考えています。
 
 本記事では、Agentic Workflowを構築するためのフレームワークとして、LangGraphと並べて **[Graflow](https://graflow.ai/)** を紹介します。両者を比較しながら、検討のきっかけになれば幸いです。
 
@@ -461,6 +461,8 @@ def consumer(context: TaskExecutionContext):
 
 Graflowでは `inject_context=True` でタスクに `TaskExecutionContext` を注入し、`channel.set()` / `channel.get()` でデータを読み書きします。Reducer という概念は不要で、**何をいつ更新するかはタスクの中で明示的に制御**します。
 
+ChannelのAPIは `set` / `get` / `delete` / `exists` といった汎用的なKey-Valueストアのインターフェースです。Redis、Memcached、あるいはPythonの辞書を使ったことがある開発者なら、新たに覚えることはほとんどありません。LangGraphの `State`（TypedDict + Reducer + `Annotated`）のようなフレームワーク固有の概念を学ぶ必要がなく、**既存の知識がそのまま使える**のもChannelの利点です。
+
 では、並列実行時の競合はどう防ぐのでしょうか？ Graflowでは**並行安全なチャネル操作**を提供しています（[Concurrency Safety](https://graflow.ai/docs/concepts/channels#concurrency-safety)）:
 
 ```python
@@ -488,10 +490,14 @@ def safe_counter(context: TaskExecutionContext):
 
 | プリミティブ | 用途 | MemoryChannel | RedisChannel |
 |---|---|---|---|
-| `append(key, value)` | ログ収集、結果の集約（FIFO） | per-key `RLock` | `RPUSH`（サーバーサイドアトミック） |
-| `prepend(key, value)` | 優先キュー、LIFO スタック | per-key `RLock` | `LPUSH`（サーバーサイドアトミック） |
+| `append(key, value)` | ログ収集、結果の集約（FIFO） | GIL + `setdefault` | `RPUSH`（サーバーサイドアトミック） |
+| `prepend(key, value)` | 優先キュー、LIFO スタック | GIL + `setdefault` | `LPUSH`（サーバーサイドアトミック） |
 | `atomic_add(key, amount)` | カウンタ、メトリクス、スコア | per-key `RLock` | `INCRBYFLOAT`（サーバーサイドアトミック） |
 | `lock(key)` | 条件付き更新、複数キーの整合操作 | per-key `RLock` | 分散ロック（`SET NX` + Lua release） |
+
+`append` / `prepend` の MemoryChannel 実装では、`dict.setdefault(key, [])` がGIL下でアトミックに動作するため、リスト初期化の競合なしに要素の追加が行えます。明示的なRLockは不要です[^gil_setdefault]。
+
+[^gil_setdefault]: CPythonのGIL（Global Interpreter Lock）により、`dict.setdefault()` や `list.append()` といったビルトイン操作は単一のバイトコード命令として実行され、スレッド間で割り込まれません。そのため、`atomic_add` のような数値の読み取り→加算→書き込みの3ステップが必要な操作とは異なり、リストへの追加はロックなしでスレッドセーフに行えます。
 
 LangGraphでは並列ノードからリストにメッセージを集約するために `Annotated[list, add_messages]` のようなReducerをStateスキーマに事前宣言する必要がありますが、Graflowでは `channel.append()` を呼ぶだけで同等の操作がスレッドセーフに行えます。LangGraphの Reducer が「**Stateスキーマに事前宣言する暗黙的な競合回避**」であるのに対し、Graflowは「**タスクコード内で必要な箇所だけ明示的に操作する**」アプローチです。Reducerの事前設計が不要なため、単純な直列ワークフローではオーバーヘッドゼロで始められ、並列化が必要になった時点で `atomic_add`、`append`、`lock` を追加するだけで済みます。
 
@@ -729,7 +735,7 @@ def request_approval(state):
 この設計の特徴と注意点:
 
 - **暗黙の中断**: `interrupt()` は一見普通の関数呼び出しに見えるが、実際には例外を送出する。コードの見た目からは「ここで処理が止まる」ことが読み取りにくい
-- **再実行ベースの再開**: 再開時はノード関数が**最初から再実行**され、`interrupt()` の箇所で今度は `resume` の値が返る。つまり `interrupt()` より前の副作用（API呼び出し、DB書き込み等）が**2回実行される**可能性がある
+- **再実行ベースの再開**: 再開時はノード関数が**最初から再実行**され、`interrupt()` の箇所で今度は `resume` の値が返る。つまり `interrupt()` より前の副作用（API呼び出し、DB書き込み等）が**2回実行される**可能性がある。なお、これはGraflowでも同様であり、チェックポイントからの再開時にはタスクが再実行されます。いずれのフレームワークでも、タスク（ノード）の**冪等性（idempotency）**を意識した設計が重要です
 - **チェックポインタ必須**: `interrupt()` を使うには `compile(checkpointer=...)` が必須。チェックポインタなしでは動作しない
 
 ### Graflow: request_feedback — 明示的な待機と通知
@@ -795,15 +801,40 @@ response = context.request_feedback(
 **動作フロー:**
 
 1. `request_feedback()` を呼び出し → 人間に通知
-2. タイムアウト内に承認 → **そのまま続行**（Blockingモード）
+2. タイムアウト内（5分）に承認 → **そのまま続行**（Blockingモード）
 3. タイムアウト経過 → **自動でチェックポイント保存、プロセスを解放**
 4. 数時間後にFeedback API経由で承認 → **チェックポイントから再開**
+
+シーケンス図で表すと次のような流れになります:
+
+```mermaid
+sequenceDiagram
+    participant WF as Workflow
+    participant HITL as 人間（承認者）
+    participant CP as Checkpoint Store
+
+    WF->>HITL: request_feedback()（Slack/Teams等で通知）
+    alt 5分以内に承認
+        HITL->>WF: approve
+        WF->>WF: そのまま後続タスクを続行
+    else 5分経過（タイムアウト）
+        WF->>CP: 自動でcheckpoint保存
+        Note over WF: プロセス解放（リソース節約）
+        HITL-->>WF: （数時間後）Feedback API経由で承認
+        CP->>WF: checkpointから再開
+        WF->>WF: 後続タスクを続行
+    end
+```
+
+この「**承認待ちで数時間待てない**」問題と、Graflowのcheckpoint/resumeによる解決アプローチの詳細は、[設計解説記事の課題4](https://zenn.dev/myui/articles/64f31faaf1488c#%F0%9F%92%A1-%E8%AA%B2%E9%A1%8C4%3A-%E6%89%BF%E8%AA%8D%E5%BE%85%E3%81%A1%E3%81%A7%E6%95%B0%E6%99%82%E9%96%93%E5%BE%85%E3%81%A6%E3%81%AA%E3%81%84)で詳しく解説しています。
 
 LangGraphの `interrupt` は常にグラフ実行を中断し、外部から `Command(resume=)` を送って再開する方式のみです。Graflowは**短時間の同期待機と長時間の非同期再開の両方をシームレスに扱える**ため、「すぐ返ってくるかもしれないが、返ってこないかもしれない」という現実の承認フローに自然に対応できます。
 
 ### Built-in の Feedback API / UI
 
 Graflowは HITL のための **REST API とフィードバックUI を標準装備**しています。LangGraphでは `interrupt` の結果を受け取って `Command(resume=)` を送る仕組みを自前で構築する必要がありますが、Graflowではフィードバック送信用のHTTPエンドポイントが組み込まれており、Slack Webhook等の通知から直接フィードバックAPIを呼び出す運用が可能です。
+
+Feedback APIはHTTPベースの汎用的なインターフェースなので、**自社のエンタープライズ向けWebアプリケーションにHITLフローを組み込む**ことも容易です。例えば、社内の承認ワークフロー画面からFeedback APIを呼び出すだけで、Graflowのワークフローと連携した承認・差し戻しフローを実現できます。
 
 フィードバックの種類:
 
