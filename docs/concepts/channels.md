@@ -156,6 +156,71 @@ def ttl_example(ctx: TaskExecutionContext):
 | `prepend(key, value)` | Prepend to list | `channel.prepend("queue", "item")` |
 | `delete(key)` | Remove a key | `channel.delete("count")` |
 | `exists(key)` | Check if key exists | `if channel.exists("count"):` |
+| `atomic_add(key, amount)` | Atomic numeric add/subtract | `channel.atomic_add("count", 1)` |
+| `lock(key, timeout)` | Advisory per-key lock | `with channel.lock("key"):` |
+
+## Concurrency Safety
+
+When tasks run in parallel via `ParallelGroup`, a naive read-modify-write (`get` → compute → `set`) is **not atomic** — two tasks may read the same value and overwrite each other's writes, causing lost updates.
+
+Graflow provides two primitives to handle this safely:
+
+### atomic_add — Atomic Counter Updates
+
+For simple numeric increments/decrements, use `atomic_add()`. It is lock-free in the common case and guaranteed not to lose updates:
+
+```python
+@task(inject_context=True)
+def count_items(ctx: TaskExecutionContext):
+    channel = ctx.get_channel()
+    # Safe even when many tasks run in parallel
+    channel.atomic_add("processed_count", 1)   # increment
+    channel.atomic_add("error_count", -1)       # decrement
+```
+
+- Missing keys are auto-initialized to `0`
+- **MemoryChannel**: per-key `threading.RLock`
+- **RedisChannel**: server-side `INCRBYFLOAT` (single-command atomic)
+
+### lock — Advisory Lock for Compound Operations
+
+When you need to read, decide, and write as one indivisible block, wrap the logic with `channel.lock()`:
+
+```python
+@task(inject_context=True)
+def check_and_reset(ctx: TaskExecutionContext):
+    channel = ctx.get_channel()
+    threshold = 10
+
+    with channel.lock("counter"):          # acquire per-key lock
+        val = channel.get("counter")
+        if val >= threshold:
+            channel.set("counter", 0)      # reset
+            channel.atomic_add("overflow_count", 1)
+        else:
+            channel.set("counter", val + 1)
+```
+
+- **MemoryChannel**: per-key `threading.RLock` (in-process)
+- **RedisChannel**: distributed lock via `redis.lock.Lock` (`SET NX` + Lua release)
+- Default timeout: 10 seconds (configurable via `timeout` parameter)
+
+### When to Use Which
+
+| Scenario | Method |
+|----------|--------|
+| Simple counter / metric | `channel.atomic_add("key", 1)` |
+| Decrement | `channel.atomic_add("key", -1)` |
+| Conditional update | `with channel.lock("key"): ...` |
+| Multi-key compound update | `with channel.lock("key"): ...` |
+| No concurrency concern | `channel.get()` / `channel.set()` is fine |
+
+### Concurrency Methods Reference
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `atomic_add(key, amount)` | Atomic numeric add/subtract | `channel.atomic_add("count", 1)` |
+| `lock(key, timeout)` | Advisory per-key lock (context manager) | `with channel.lock("counter"):` |
 
 ## Type-Safe Channels
 
