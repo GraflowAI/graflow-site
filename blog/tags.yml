@@ -12,3 +12,8 @@ release:
   label: Release
   permalink: /release
   description: Release notes and version updates
+
+comparison:
+  label: Comparison
+  permalink: /comparison
+  description: Framework comparisons and migration guides
