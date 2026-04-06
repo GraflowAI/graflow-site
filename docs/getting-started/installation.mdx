@@ -68,6 +68,49 @@ uv add "graflow[all]"
 
 You can also install individual extras, e.g. `graflow[visualization]` or `graflow[tracing]`.
 
+:::note[pygraphviz requires system-level Graphviz]
+
+`graflow[visualization]` (and `graflow[all]`) depends on **pygraphviz**, which requires the Graphviz C libraries to be installed on your system **before** running `pip install`. Without them, the build will fail with an error like:
+
+```
+× Building wheel for pygraphviz (pyproject.toml) did not run successfully.
+  │ exit code: 1
+  ╰─> See above for output.
+
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+  Building wheel for pygraphviz (pyproject.toml) ... error
+  ERROR: Failed building wheel for pygraphviz
+ERROR: ERROR: Failed to build installable wheels for some pyproject.toml based projects (pygraphviz)
+```
+
+Install Graphviz first using your system package manager:
+
+<Tabs>
+  <TabItem value="mac" label="macOS" default>
+
+```bash
+brew install graphviz
+```
+
+Depending on your environment, you may also need to set the following environment variables so that pygraphviz can find the Graphviz headers and libraries:
+
+```bash
+export CFLAGS="-I$(brew --prefix graphviz)/include"
+export LDFLAGS="-L$(brew --prefix graphviz)/lib"
+```
+
+  </TabItem>
+  <TabItem value="debian" label="Debian / Ubuntu">
+
+```bash
+sudo apt install -y --no-install-recommends graphviz graphviz-dev
+```
+
+  </TabItem>
+</Tabs>
+
+:::
+
 ## Verify Installation
 
 After installation, verify that Graflow is installed correctly:
