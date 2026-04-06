@@ -11,7 +11,7 @@ A side-by-side comparison of LangGraph and Graflow, covering design philosophy, 
 
 ## Introduction
 
-Autonomous coding agents like Claude Code (including [Cowork](https://docs.anthropic.com/en/docs/claude-code/cowork)) and OpenClaw are gaining traction. However, in enterprise environments — where compliance, approval flows, and audit trails are non-negotiable — fully autonomous agents rarely work out of the box. The realistic middle ground is **Agentic Workflow**: AI handles the processing while humans make decisions at key checkpoints.
+Autonomous agents like [Claude Cowork](https://docs.anthropic.com/en/docs/claude-code/cowork) and [OpenClaw](https://openclaw.ai/) are gaining traction. However, in enterprise environments — where compliance, approval flows, and audit trails are non-negotiable — fully autonomous agents rarely work out of the box. The realistic middle ground is **Agentic Workflow**: AI handles the processing while humans make decisions at key checkpoints.
 
 This three-part series compares [LangGraph](https://langchain-ai.github.io/langgraph/) and [Graflow](https://graflow.ai/) for building agentic workflows. Part 1 covers design philosophy and core workflow features.
 
