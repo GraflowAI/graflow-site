@@ -15,7 +15,7 @@ The choice between AI workflows and autonomous agents isn't binary — it's a [s
 
 ### The Production Gap
 
-Autonomous coding agents like Claude Code and OpenClaw show how far the slider can go. But in enterprise environments — where compliance, approval flows, and audit trails are non-negotiable — cranking the slider to maximum autonomy rarely works. You need to **control where the slider sits**, per task, per workflow, per use case.
+Autonomous agents like Claude Cowork and OpenClaw show how far the slider can go. But in enterprise environments — where compliance, approval flows, and audit trails are non-negotiable — cranking the slider to maximum autonomy rarely works. You need to **control where the slider sits**, per task, per workflow, per use case.
 
 This is the gap: most existing tools force you to choose. Deterministic workflow engines (Airflow, Dagster) can't express agent reasoning loops. Fully autonomous agent frameworks give you the ReAct loop but lack orchestration primitives — checkpointing, HITL, distributed execution, error policies — that production demands.
 
