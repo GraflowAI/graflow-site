@@ -38,7 +38,7 @@ def hello():
     print("Hello!")
 
 # Custom: task_id is "greeting_task"
-@task(task_id="greeting_task")
+@task("greeting_task")
 def hello():
     print("Hello!")
 ```

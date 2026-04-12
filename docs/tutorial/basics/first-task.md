@@ -35,7 +35,12 @@ def hello():
     print("Hello!")
 
 # Custom: task_id is "greeting_task"
-@task(task_id="greeting_task")
+@task("greeting_task")
+def hello():
+    print("Hello!")
+
+# Equivalent keyword syntax
+@task(id="greeting_task")
 def hello():
     print("Hello!")
 ```
@@ -43,7 +48,7 @@ def hello():
 **Key Takeaways:**
 - Use `@task` to create tasks
 - Default `task_id` is the function name
-- Use `@task(task_id="custom_id")` for explicit naming
+- Use `@task("custom_id")` or `@task(id="custom_id")` for explicit naming
 
 ## Testing Tasks with .run()
 

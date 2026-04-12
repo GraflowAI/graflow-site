@@ -31,7 +31,7 @@ Create task instances with bound parameters:
 def fetch_weather(city: str) -> str:
     return f"Weather for {city}"
 
-# Create instances with different parameters
+# Create instances — task_id identifies the instance, other kwargs are bound parameters
 tokyo = fetch_weather(task_id="tokyo", city="Tokyo")
 paris = fetch_weather(task_id="paris", city="Paris")
 london = fetch_weather(task_id="london", city="London")
@@ -123,6 +123,19 @@ with workflow("dynamic") as wf:
 
     wf.execute()
 ```
+
+:::info `task_id` vs `id`
+**`task_id`** is a parameter for **instance creation** — it identifies a specific instance within the workflow.
+This is different from **`@task("id")`** or **`@task(id="id")`**, which set the ID of the task definition itself.
+
+```python
+@task("fetch")                          # Definition ID: "fetch"
+def fetch_weather(city: str) -> str: ...
+
+tokyo = fetch_weather(task_id="tokyo", city="Tokyo")  # Instance ID: "tokyo"
+paris = fetch_weather(task_id="paris", city="Paris")  # Instance ID: "paris"
+```
+:::
 
 **Key Takeaways:**
 - Task instances reuse task logic with different parameters

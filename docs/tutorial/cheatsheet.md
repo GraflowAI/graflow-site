@@ -11,7 +11,7 @@ A quick reference for Graflow syntax and APIs.
 | Syntax | Purpose | Learn More |
 |--------|---------|------------|
 | `@task` | Convert function to task | [Your First Task](./basics/first-task) |
-| `@task(task_id="id")` | Set explicit task identifier | [Your First Task](./basics/first-task) |
+| `@task("id")` / `@task(id="id")` | Set explicit task identifier | [Your First Task](./basics/first-task) |
 | `@task(inject_context=True)` | Access channels/workflow control | [Channels and Context](./core-concepts/channels-context) |
 | `@task(inject_llm_client=True)` | Direct LLM API calls | [Channels and Context](./core-concepts/channels-context) |
 | `@task(inject_llm_agent="name")` | Inject SuperAgent with tools | [Channels and Context](./core-concepts/channels-context) |
