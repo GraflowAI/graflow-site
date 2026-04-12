@@ -81,6 +81,24 @@ wf.execute(initial_channel={"value": 100, "multiplier": 5})
 # Result: 10 × 5 = 50 (bound value beats channel value)
 ```
 
+:::info How it works under the hood
+
+When you call `calculate(task_id="calc", value=10)`, `TaskWrapper.__call__` enters **instance creation mode**:
+
+1. **`task_id` extraction** — `"calc"` is popped from kwargs and becomes the new instance's ID ([task.py#L960-L961](https://github.com/GraflowAI/graflow/blob/main/graflow/core/task.py#L960-L961))
+2. **Instance creation** — A new `TaskWrapper` is created with the extracted ID, inheriting all decorator settings ([task.py#L968-L980](https://github.com/GraflowAI/graflow/blob/main/graflow/core/task.py#L968-L980))
+3. **Parameter binding** — Remaining kwargs (`value=10`) are stored in `_bound_kwargs` ([task.py#L984](https://github.com/GraflowAI/graflow/blob/main/graflow/core/task.py#L984))
+
+At execution time, parameters are merged in priority order `channel < bound < injection`:
+
+```python
+all_kwargs = {**resolved_kwargs, **bound_kwargs, **injection_kwargs, **kwargs}
+```
+
+See [task.py#L994-L1004](https://github.com/GraflowAI/graflow/blob/main/graflow/core/task.py#L994-L1004) for the full resolution logic.
+
+:::
+
 **Key Takeaways:**
 - Tasks can communicate via channels (see [Channels and Context](../core-concepts/channels-context) for details)
 - Bind some parameters at task creation, let others come from channel
