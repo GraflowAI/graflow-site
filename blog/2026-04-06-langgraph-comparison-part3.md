@@ -91,6 +91,42 @@ def research(agent, query: str) -> str:
     return result["output"]
 ```
 
+**PydanticAI example — Type-safe structured output:**
+
+```python
+from pydantic import BaseModel
+from pydantic_ai import Agent
+from graflow.llm.agents import PydanticLLMAgent
+
+# Define structured output schema
+class AnalysisResult(BaseModel):
+    sentiment: str
+    confidence: float
+    key_points: list[str]
+
+# Create Pydantic AI agent with structured output
+pydantic_agent = Agent(
+    model="openai:gpt-4o",
+    output_type=AnalysisResult,
+    system_prompt="You are a data analyst.",
+)
+
+@pydantic_agent.tool
+def search_data(ctx, query: str) -> dict:
+    return {"results": ["result1", "result2"]}
+
+agent = PydanticLLMAgent(pydantic_agent, name="analyzer")
+context.register_llm_agent("analyzer", agent)
+
+@task(inject_llm_agent="analyzer")
+def analyze(agent, text: str) -> dict:
+    result = agent.run(text)
+    output: AnalysisResult = result["output"]  # Type-safe!
+    return output.model_dump()
+```
+
+Both ADK and PydanticAI agents are registered and used through the **same `inject_llm_agent` interface** — the workflow code doesn't need to know which framework is behind the agent.
+
 ### SuperAgent as a Fat Node — Separation of Concerns
 
 This is a fundamental design difference between the two frameworks.
@@ -393,13 +429,68 @@ with workflow("task_agent") as ctx:
     ctx.execute("handle_request")
 ```
 
+**Swapping to PydanticAI — only the agent registration changes:**
+
+```python
+from pydantic_ai import Agent
+from graflow.llm.agents import PydanticLLMAgent
+
+with workflow("task_agent") as ctx:
+
+    # Same tools, different agent framework
+    pydantic_agent = Agent(
+        model="openai:gpt-4o",
+        system_prompt="You are a task management assistant. Use the appropriate tools.",
+    )
+
+    # Register tools via @agent.tool decorator
+    @pydantic_agent.tool
+    def add_task_tool(ctx, title: str, important: bool = False) -> str:
+        """Create a new task."""
+        entry = {"id": len(task_store) + 1, "title": title,
+                 "important": important, "done": False}
+        task_store.append(entry)
+        return f"Added task '{title}' (ID: {entry['id']})"
+
+    @pydantic_agent.tool
+    def list_tasks_tool(ctx) -> str:
+        """List all tasks."""
+        if not task_store:
+            return "No tasks"
+        return "\n".join(
+            f"{'[x]' if t['done'] else '[ ]'} [{t['id']}] {t['title']}"
+            + (" *" if t["important"] else "")
+            for t in task_store
+        )
+
+    agent = PydanticLLMAgent(pydantic_agent, name="task_manager")
+    ctx.register_llm_agent("task_manager", agent)
+
+    # The workflow tasks remain EXACTLY the same
+    @task(inject_llm_agent="task_manager", inject_context=True)
+    def handle_request(llm_agent: LLMAgent, context: TaskExecutionContext):
+        """Agent handles tool selection, execution, and response"""
+        result = llm_agent.run("Add 'Write report' as an important task")
+        print(f"Agent: {result['output']}")
+
+    @task(inject_context=True)
+    def confirm_deletion(context: TaskExecutionContext):
+        """HITL approval — identical to ADK version"""
+        # ... (same as above)
+
+    handle_request >> confirm_deletion
+    ctx.execute("handle_request")
+```
+
+The key point: **only the agent setup changes** — tool registration moves from plain functions to `@agent.tool` decorators, and `AdkLLMAgent` becomes `PydanticLLMAgent`. The workflow tasks (`handle_request`, `confirm_deletion`) and their wiring remain identical.
+
 ### Design Philosophy Comparison
 
 | Aspect | LangGraph | Graflow |
 |---|---|---|
-| **Tool definitions** | `@tool` decorator (LangChain-dependent) | Plain Python functions (ADK auto-infers schema) |
-| **ReAct loop** | `agent`→`tools`→`agent` built as graph nodes | ADK handles internally (`llm_agent.run()` — one line) |
-| **Tool dispatch** | `ToolNode` auto-dispatch | ADK auto-dispatch |
+| **Tool definitions** | `@tool` decorator (LangChain-dependent) | Plain functions (ADK) / `@agent.tool` (PydanticAI) |
+| **ReAct loop** | `agent`→`tools`→`agent` built as graph nodes | Delegated to agent framework (`llm_agent.run()` — one line) |
+| **Tool dispatch** | `ToolNode` auto-dispatch | ADK / PydanticAI auto-dispatch |
 | **HITL** | `interrupt()` → `Command(resume=)` | `request_feedback()` (regular function call) |
 | **State management** | `AgentState` (TypedDict + Reducer) | Channel `set`/`get` |
 | **LLM choice** | `ChatOpenAI` etc. (LangChain-dependent) | ADK (Gemini) / LiteLLM (all providers) |
