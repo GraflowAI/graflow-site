@@ -303,12 +303,12 @@ wf.register_llm_agent("weather", agent)
 
 #### LiteLLM Backend
 
-Use `create_pydantic_ai_agent_with_litellm` to route PydanticAI through LiteLLM for unified provider access:
+Use `create_pydantic_ai_agent` to route PydanticAI through LiteLLM for unified provider access:
 
 ```python
-from graflow.llm.agents import PydanticLLMAgent, create_pydantic_ai_agent_with_litellm
+from graflow.llm.agents import PydanticLLMAgent, create_pydantic_ai_agent
 
-pydantic_agent = create_pydantic_ai_agent_with_litellm(
+pydantic_agent = create_pydantic_ai_agent(
     model="openai/gpt-4o",          # LiteLLM format: 'provider/model'
     instructions="You are a helpful assistant.",
     name="assistant",
